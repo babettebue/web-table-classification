@@ -1,0 +1,23 @@
+formatters:
+  simple:
+    format: '[%(asctime)s - %(levelname)s - {%(funcName)s}] %(message)s'
+handlers:
+  console:
+    class: logging.StreamHandler
+    formatter: simple
+    stream: ext://sys.stdout
+  file_handler:
+    class: logging.FileHandler
+    formatter: simple
+    filename: gs-extraction.log
+    encoding: utf8
+    mode: a
+loggers:
+  __main__:
+    handlers:
+    - console
+    - file_handler
+    level: DEBUG
+    propagate: false
+
+version: 1
