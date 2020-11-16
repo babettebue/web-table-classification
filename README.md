@@ -1,6 +1,6 @@
 # Web table classification
 
-##dwtc-extension
+## dwtc-extension
 
 Contains scripts to access DWTC extractor 
 DWTC extractor github repository: https://github.com/JulianEberius/dwtc-extractor
