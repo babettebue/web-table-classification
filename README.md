@@ -5,18 +5,14 @@
 
 Contains scripts for data collection and image rendering to generate a new gold standard
 
-
-## GoldStandard_tvt
-
-Contains Goldstandard images in training, validation and test split sub folders
-
 ## Data
 
-Contains Goldstandard pkl and csv datasets 
+Goldstandard datasets can be downloaded here: http://data.dws.informatik.uni-mannheim.de/visual_table_classification/
 
+- GoldStandard_tvt: Goldstandard images in training, validation and test split sub folders
 - gs_125_warc_files_comb.pkl: goldstandard html code, url, s3links, labels
 - predictions2-with-features.pkl: manual features and predictions by DWTC-extractor classifier for new gold standard
-- Helper files: all_test_ids.npy, all_val_ids.npy, 
+- Helper files: all_test_ids.npy, all_val_ids.npy
 
 ## Model_development
 
