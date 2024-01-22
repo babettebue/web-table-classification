@@ -1,37 +1,31 @@
 package webreduce.extension.classification;
-
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.Arrays;
-
-import com.google.common.base.Optional;
 import com.google.inject.name.Named;
-
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
-
 import webreduce.data.TableType;
 import webreduce.extraction.mh.TableClassification;
 import webreduce.extraction.mh.features.FeaturesP1;
 import webreduce.extraction.mh.tools.ClassificationResult;
-import webreduce.extraction.mh.tools.TableConvert;
 import weka.classifiers.Classifier;
 import weka.core.Attribute;
 import weka.core.Instance;
+import webreduce.extension.classification.TableParser.TableParsingException;
+import webreduce.extension.classification.TableParser.TableParsingSubTablesException;
 
 public class TableClassificationPhase1 {
 
-    private TableConvert tableConverter;
     private FeaturesP1 phase1Features;
     private Classifier classifier1;
     private Attribute classAttr1;
     private double layoutVal, relationVal;
-    private static final int TABLE_MIN_ROWS = 2;
-    private static final int TABLE_MIN_COLS = 2;
+    private TableParser tableParser;
 
     public TableClassificationPhase1(@Named("phase1ModelPath") String phase1ModelPath) {
         phase1Features = new FeaturesP1();
-        tableConverter = new TableConvert(TABLE_MIN_ROWS, TABLE_MIN_COLS);
+        tableParser = new TableParser();
 
         try {
             classifier1 = TableClassification.loadModelFromFile(phase1ModelPath);
@@ -68,10 +62,10 @@ public class TableClassificationPhase1 {
     public ClassificationResult classifyTable(String tableHTML) {
         Element[][] table;
         try {
-            table = parseTableHTML(tableHTML);
+            table = tableParser.parseTableHTML(tableHTML);
         } catch (TableParsingSubTablesException e) {
             System.out.println(e.getMessage());
-            return new ClassificationResult(TableType.LAYOUT, new double[]{}, null);
+            return new ClassificationResult(TableType.LAYOUT, new double[] {}, null);
         } catch (TableParsingException e) {
             System.out.println(e.getMessage());
             return null;
@@ -83,9 +77,9 @@ public class TableClassificationPhase1 {
         Element[][] table;
 
         try {
-            table = parseTableHTML(tableHTML);
+            table = tableParser.parseTableHTML(tableHTML);
         } catch (TableParsingException e) {
-            System.out.println(e.getMessage()); 
+            System.out.println(e.getMessage());
             return null;
         }
 
@@ -94,45 +88,27 @@ public class TableClassificationPhase1 {
         return currentInst.toDoubleArray();
     }
 
-    private Element[][] parseTableHTML(String tableHTML) throws TableParsingException {
-        return parseTableHTML(tableHTML, true);
+      public static void main(String[] args) throws IOException {
+    BufferedReader br = new BufferedReader(
+        new FileReader("/Users/yuvalpeleg/My Drive/Projects/JParser/tables/table.html"));
+    try {
+      StringBuilder sb = new StringBuilder();
+      String line = br.readLine();
+
+      while (line != null) {
+        sb.append(line);
+        sb.append(System.lineSeparator());
+        line = br.readLine();
+      }
+      String everything = sb.toString();
+      TableClassificationPhase1 classificationPhase1 = new TableClassificationPhase1("/Users/yuvalpeleg/projects/web-table-classification/runtime_testing/resources/RandomForest_P1.mdl");
+      var res = classificationPhase1.classifyTable(everything);
+      System.out.println(res.toString());
+
+    } catch (Exception e) {
+      System.out.println(e.toString());
+    } finally {
+      br.close();
     }
-
-    private Element[][] parseTableHTML(String tableHTML, boolean skipSubTables) throws TableParsingException {
-        Document doc = Jsoup.parse(tableHTML);
-        Element table = doc.select("table").first();
-        if (table == null) {
-            throw new TableParsingException("Failure, no table was detected in HTML. Skipping table classification.");
-        }
-
-        Elements subTables = table.getElementsByTag("table");
-        subTables.remove(table);
-        if (subTables.size() > 0 && skipSubTables) {
-            throw new TableParsingSubTablesException(
-                    "Failure, table includes sub-table(s). Skipping table classification.");
-        }
-
-        Optional<Element[][]> convertedTable = tableConverter.toTable(table);
-        if (!convertedTable.isPresent()) {
-            throw new TableParsingException("toTable() failed. Skipping table classification.");
-        }
-
-        return convertedTable.get();
-    }
-
-    public class TableParsingException extends Exception {
-        private static final long serialVersionUID = 5471172109211007529L;
-
-        public TableParsingException(String errorMessage) {
-            super(errorMessage);
-        }
-    }
-
-    public class TableParsingSubTablesException extends TableParsingException {
-        private static final long serialVersionUID = -4415254026083906516L;
-
-        public TableParsingSubTablesException(String errorMessage) {
-            super(errorMessage);
-        }
-    }
+  }
 }
