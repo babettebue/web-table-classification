@@ -1,5 +1,14 @@
 import os
+import logging
+import urllib.request
+
 jar_file_path = f'{os.path.dirname(os.path.realpath(__file__))}/../runtime_testing/resources/dwtc-extension-1.0-jar-with-dependencies.jar'
+if not os.path.isfile(jar_file_path):
+    logging.warning('JAR File missing, downloading')
+
+
+    urllib.request.urlretrieve("https://github.com/lavuy/web-table-classification/raw/c6cc1eeb62b996b8bbcd26b6dc27841d1464b884/runtime_testing/resources/dwtc-extension-1.0-jar-with-dependencies.jar", jar_file_path)
+
 os.environ['CLASSPATH'] = jar_file_path
 
 #import jnius_config
