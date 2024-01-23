@@ -1,6 +1,8 @@
 import os
 import pandas as pd
+from utils.image_rendering import pickle_to_formatted_csv
 import jnius_config
+
 resources = os.path.join('runtime_testing', 'resources')
 jar_file_path = os.path.join(resources, 'dwtc-extension-1.0-jar-with-dependencies.jar')
 jnius_config.set_classpath(jar_file_path)
@@ -30,13 +32,3 @@ def make_prediction(dataset_path, random_forest_model_path):
     RF = autoclass('webreduce.extension.classification.TableClassificationUtils')
     rf_classifier = RF(random_forest_model_path)
     rf_classifier.benchmarkTableClassification(csv_dataset_path)
-
-def classify_table_2_phase(table_html):
-    TableClassifier = autoclass('webreduce.extension.classification.TableClassifier')
-    table_classifier = TableClassifier()
-    return table_classifier.classify_table(table_html)
-
-if __name__ == '__main__':
-    with open(f'{os.path.dirname(os.path.realpath(__file__))}/../resources/table.html') as f:
-        table_html = f.read()
-        print(classify_table_2_phase(table_html))
