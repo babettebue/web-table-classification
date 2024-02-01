@@ -17,6 +17,7 @@ table_classifier = None
 
 
 def _init_table_classifier():
+    # When running in multiprocess the JDK seems to use the parent's JDK thus causing a seg fault
     from jnius import autoclass
 
     TableClassifier = autoclass('webreduce.extension.classification.TableClassifier')
